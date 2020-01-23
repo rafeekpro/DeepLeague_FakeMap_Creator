@@ -40,7 +40,12 @@ parser.add_argument(
     type=str,
     help='label type. Defauñt Yolov3',
     default="yolo")
-   
+parser.add_argument(
+    '-s',
+    '--size',
+    type=str,
+    help='Map size (big, medium, small) default is small',
+    default="small")  
 
 def _main():
     args = parser.parse_args()
@@ -50,14 +55,14 @@ def _main():
 
     # baseMap = 'LOL_images/minimap/map115.png'
     hero_list_path = 'media/class.txt'
-    map_size = "small"
-    amount_images = args.number_combinations
+    map_size = args.size
+    amount_maps = args.number_combinations
     noise = ""
     amount_heros = ""
     ping = ""
     noise_path = "LOL_images/noise/"
 
-    creator = DataCreator(map_size, args.number_combinations, noise, amount_heros, ping, args.output_filename, noise_path, hero_list_path)
+    creator = DataCreator(map_size, amount_maps, noise, amount_heros, ping, args.output_filename, noise_path, hero_list_path)
     creator.create_images()
 
     # if args.input_image:
