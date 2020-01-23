@@ -1,0 +1,7 @@
+venv
+base_images
+cover_images
+output
+heroes
+.vscode
+__pycache__
