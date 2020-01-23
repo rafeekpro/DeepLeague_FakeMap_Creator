@@ -18,7 +18,7 @@ def progress(count, total, status=''):
 
 
 class DataCreator:
-    def __init__(self, map_size, amount_maps, noise, amount_heros, ping, output_filename, noise_path, hero_list_path):
+    def __init__(self, map_size, amount_maps, noise, amount_heros, ping, output_filename, noise_path, hero_list_path, heroes_group, wards_number, wards_path, heroe_path):
         self.map_size = map_size
         self.amount_maps = amount_maps
         self.noise = noise
@@ -27,37 +27,44 @@ class DataCreator:
         self.output_filename = output_filename
         self.noise_path = noise_path
         self.hero_list = self.convert_class2list(hero_list_path)
+        self.heroes_group = heroes_group
+        self.wards_number = wards_number
+        self.wards_path = wards_path
+        self.heroe_path = heroe_path
         self.baseMap = 'LOL_images/minimap/map916_inner.png'
         if self.map_size == "big":
             self.map_dimension = 920
             self.map_x_min = 80
-            self.map_x_max = 870
+            self.map_x_max = 850
             self.map_y_min = 80
-            self.map_y_max = 870
+            self.map_y_max = 850
             self.offset_dif = 70
             self.hero_size = 76
             self.hero_inner_size = 70
             self.cicrle_size = 3
+            self.ward_size = 44
         elif self.map_size == "medium":
             self.map_dimension = 425
-            self.map_x_min = 21
-            self.map_x_max = 403
-            self.map_y_min = 21
-            self.map_y_max = 403
+            self.map_x_min = 35
+            self.map_x_max = 390
+            self.map_y_min = 35
+            self.map_y_max = 390
             self.offset_dif = 45
             self.hero_size = 50
             self.hero_inner_size = 45
             self.cicrle_size = 2
+            self.ward_size = 30
         else:    
             self.map_dimension = 255
-            self.map_x_min = 12
-            self.map_x_max = 242
-            self.map_y_min = 12
-            self.map_y_max = 242
+            self.map_x_min = 20
+            self.map_x_max = 230
+            self.map_y_min = 20
+            self.map_y_max = 230
             self.offset_dif = 20
             self.hero_size = 25
             self.hero_inner_size = 23
             self.cicrle_size = 1
+            self.ward_size = 15
 
             
     def create_images(self):
@@ -77,8 +84,11 @@ class DataCreator:
                 else: 
                     output_filename = randomString(15) 
                 
-                for i in range(10):
+                for i in range(self.heroes_group):
                     bckg, labels = self.put_heroes_group(bckg, labels)
+                
+                bckg, labels = self.put_wards(bckg, labels)
+                
                 # print(labels)
                 with open("output/"+output_filename+'.txt', 'w') as f:
                     for i, item in enumerate(labels):
@@ -130,17 +140,23 @@ class DataCreator:
         return line 
 
 
-    def random_hero(self, directory):
+    def random_ward(self):
+        """
+        Random select Ward
+        """
+        filename = random.choice(os.listdir(self.wards_path))
+        ward = Image.open(self.wards_path+filename).resize((self.ward_size,self.ward_size))
+        return (ward, filename)
+    
+    
+    def random_hero(self):
         """
         Random select hero from heroes directory
         image_size for small minimap 30, for big minimap 70
         directory where heroes are ("LOL_images/heroes1x/")
         """
-        # Random select hero
-        filename = random.choice(os.listdir(directory))
-        # Open hero
-        # hero = Image.open(args.input_image)
-        hero = Image.open(directory+filename).resize((self.hero_inner_size,self.hero_inner_size))
+        filename = random.choice(os.listdir(self.heroe_path))
+        hero = Image.open(self.heroe_path+filename).resize((self.hero_inner_size,self.hero_inner_size))
         return (hero, filename)
 
 
@@ -149,8 +165,15 @@ class DataCreator:
         Define position of secondary heroes
         Based on offset of primary and size of hero image
         """
-        img_x = np.random.randint(offset[0]-self.offset_dif, offset[0]+self.offset_dif)
-        img_y = np.random.randint(offset[1]-self.offset_dif, offset[1]+self.offset_dif)
+        if random.random() < .5:
+            img_x = np.random.randint(offset[0]-self.offset_dif, offset[0]-(self.offset_dif*0.2))
+        else:
+            img_x = np.random.randint(offset[0]+(self.offset_dif*0.2), offset[0]+self.offset_dif)
+            
+        if random.random() < .5:        
+            img_y = np.random.randint(offset[1]-self.offset_dif, offset[1]-(self.offset_dif*0.2))
+        else:
+            img_y = np.random.randint(offset[1]+(self.offset_dif*0.2), offset[1]+self.offset_dif)
         return (img_x, img_y)
 
 
@@ -166,6 +189,29 @@ class DataCreator:
         return (img_x,img_y)
 
 
+    def insert_ward(self, bckg, offset, labels):
+        """
+        Insert ward in map
+        Get image of ward and put it over map
+        Create line of label for this hero
+        Return updated data of labels lines and updated map
+        """
+        # Get Random file with hero
+        ward, filename = self.random_ward()
+        # Extract hero_name from filename
+        ward_name = filename.replace(".png", "")
+        # Get number of class
+        hero_num =  self.hero_list.index(ward_name)
+        # ward_w, ward_h = ward.size
+        # Set ward in map
+        bckg.paste(ward, offset, ward)
+        
+        # Create label line
+        label = self.make_label(ward, offset, bckg, hero_num)
+        labels.append(label)
+        return bckg, labels
+    
+    
     def insert_hero(self, bckg, offset, labels):
         """
         Insert hero in map
@@ -175,12 +221,12 @@ class DataCreator:
         Return updated data of labels lines and updated map
         """
         # Get Random file with hero
-        hero, filename = self.random_hero("LOL_images/heroes1x/")
+        hero, filename = self.random_hero()
         # Extract hero_name from filename
         hero_name = filename.replace(".png", "")
         # Get number of class
         hero_num =  self.hero_list.index(hero_name)
-        hero_w, hero_h = hero.size
+        # hero_w, hero_h = hero.size
         # Set hero in map
         if random.random() < .5:
             hero_base = Image.open(self.noise_path + "leblanc_fake_allyteam.png").resize((self.hero_size, self.hero_size))
@@ -208,7 +254,15 @@ class DataCreator:
         """
         offset = self.random_main_position(bckg)
         bckg, labels = self.insert_hero(bckg, offset, labels)
-        num_heroes = np.random.randint(0, 4)
+        num_heroes = np.random.randint(0, 3)
         for i in range(num_heroes):
             bckg, labels = self.insert_hero(bckg, self.random_secondary_position(offset), labels)
+        return bckg, labels
+
+    def put_wards(self, bckg, labels):
+        """
+        Put wards on the map
+        """
+        for i in range(self.wards_number):
+            bckg, labels = self.insert_ward(bckg, self.random_main_position(bckg), labels)
         return bckg, labels

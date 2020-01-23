@@ -46,6 +46,19 @@ parser.add_argument(
     type=str,
     help='Map size (big, medium, small) default is small',
     default="small")  
+parser.add_argument(
+    '-hg',
+    '--heroes_group',
+    type=int,
+    help='Number of heroes group. One heroes group is group from 0 to 5 heroes close each other. Default is 5',
+    default=5) 
+parser.add_argument(
+    '-w',
+    '--wards',
+    type=int,
+    help='Number of wards',
+    default=4)   
+
 
 def _main():
     args = parser.parse_args()
@@ -57,12 +70,16 @@ def _main():
     hero_list_path = 'media/class.txt'
     map_size = args.size
     amount_maps = args.number_combinations
+    heroes_group = args.heroes_group
+    wards = args.wards
     noise = ""
     amount_heros = ""
     ping = ""
+    heroe_path = "LOL_images/heroes1x/"
     noise_path = "LOL_images/noise/"
+    wards_path = "LOL_images/wards/"
 
-    creator = DataCreator(map_size, amount_maps, noise, amount_heros, ping, args.output_filename, noise_path, hero_list_path)
+    creator = DataCreator(map_size, amount_maps, noise, amount_heros, ping, args.output_filename, noise_path, hero_list_path, heroes_group, wards, wards_path, heroe_path)
     creator.create_images()
 
     # if args.input_image:

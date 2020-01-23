@@ -144,3 +144,10 @@ cassiopeia
 graves
 shen
 rakan
+ward_blue
+ward_blue_colorblind
+ward_green
+ward_green_colorblind
+ward_green_enemy
+ward_green_enemy_spectator
+ward_green_spectator
