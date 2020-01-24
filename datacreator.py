@@ -34,10 +34,6 @@ class DataCreator:
         self.baseMap = 'LOL_images/minimap/map916_inner.png'
         if self.map_size == "big":
             self.map_dimension = 920
-            self.map_x_min = 80
-            self.map_x_max = 850
-            self.map_y_min = 80
-            self.map_y_max = 850
             self.offset_dif = 70
             self.hero_size = 76
             self.hero_inner_size = 70
@@ -45,10 +41,6 @@ class DataCreator:
             self.ward_size = 44
         elif self.map_size == "medium":
             self.map_dimension = 425
-            self.map_x_min = 35
-            self.map_x_max = 390
-            self.map_y_min = 35
-            self.map_y_max = 390
             self.offset_dif = 45
             self.hero_size = 50
             self.hero_inner_size = 45
@@ -56,16 +48,15 @@ class DataCreator:
             self.ward_size = 30
         else:    
             self.map_dimension = 255
-            self.map_x_min = 20
-            self.map_x_max = 230
-            self.map_y_min = 20
-            self.map_y_max = 230
             self.offset_dif = 20
             self.hero_size = 25
             self.hero_inner_size = 23
             self.cicrle_size = 1
             self.ward_size = 15
-
+        self.map_x_min = 2*self.hero_inner_size
+        self.map_x_max = self.map_dimension-(2*self.hero_inner_size)
+        self.map_y_min = self.map_x_min
+        self.map_y_max = self.map_x_max
             
     def create_images(self):
         """
